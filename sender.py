@@ -1,3 +1,5 @@
+import os
+import math
 import socket
 import time
 import datetime
@@ -5,13 +7,7 @@ import datetime
 
 class Sender:
     def __init__(
-        self,
-        rcv_ip,
-        rcv_port=1234,
-        socket_timeout=10,
-        timer=0,
-        timeout_period=1,
-        window_size=10,
+        self, dest_ip, dest_port, socket_timeout, pkt_timeout, window_size, data_size
     ):
         """[summary]
 
@@ -24,7 +20,6 @@ class Sender:
             window_size (int, optional): The size of the windo in the GBN. Defaults to 10.
 
         """
-        self.sock = 1
         self.rcv_ip = rcv_ip
         self.rcv_port = rcv_port
         self.socket_timeout = socket_timeout
@@ -33,26 +28,27 @@ class Sender:
         self.window_size = window_size
         self.packets_number = 0
         self.packet_list = []
+        self.data_size = data_size
 
     def UDPConnect(self):
 
         # Create a datagram socket
-        UDP_sender_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-        # Bind to address and ip
-        print("UDP sender up and listening")
+        self.UDP_sender_socket = socket.socket(
+            family=socket.AF_INET, type=socket.SOCK_DGRAM
+        )
         # Send to server using created UDP socket
         file_info = f"0\r\n{self.packets_number}"
         try:
-            UDP_sender_socket.sendto(
+            self.UDP_sender_socket.sendto(
                 file_info.encode("utf_8"), (self.rcv_ip, self.rcv_port)
             )
-            UDP_sender_socket.settimeout(2)
-            _, addr = UDP_sender_socket.recvfrom(1)
+            self.UDP_sender_socket.settimeout(2)
+            _, addr = self.UDP_sender_socket.recvfrom(1)
             print("established connection with: ", addr)
-            UDP_sender_socket.settimeout(self.socket_timeout)
+            self.UDP_sender_socket.settimeout(self.socket_timeout)
         except socket.timeout:
             print("reciever didnt respond, connection failed")
-            UDP_sender_socket.close()
+            self.UDP_sender_socket.close()
 
     def send_file(self, fname):
         send_base = 0
@@ -62,11 +58,24 @@ class Sender:
                 self.send_pkt(self.packet_list[next_seq_num])
                 next_seq_num += 1
 
+    def make_packets(self, fname):
+        file_size = os.path.getsize(fname)
+        num_packets = math.ceil(file_size / self.data_size)
+        seq_num_bytes = math.ceil(num_packets.bit_length() / 8)
+        f = open(fname, "rb")
+        packets = []
+        for i in range(num_packets):
+            packets.append(
+                i.to_bytes(seq_num_bytes, byteorder="little", signed=False)
+                + b"\r\n"
+                + f.read(self.data_size)
+            )
+        self.packets = packets
+
     def send_pkt(self, pkt):
         pass
 
     def resv_ack(self):
-        # self.sock.recv()
         pass
 
     def CheckTimeout(self) -> bool:
@@ -85,6 +94,7 @@ if __name__ == "__main__":
     socket_timeout = 10
     timer = 1
     window_size = 10
+    timeout_period = 2
 
     sender = Sender(rcv_ip, rcv_port, socket_timeout, timer, window_size)
 
