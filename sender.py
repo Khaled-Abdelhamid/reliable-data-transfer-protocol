@@ -30,7 +30,7 @@ class Sender:
 
     def make_packets(self, fname):
         file_size = os.path.getsize(fname)
-        num_packets = math.ceil(file_size / self.payload_size) + 1
+        num_packets = math.ceil(file_size / self.payload_size)
         seq_num_bytes = math.ceil(num_packets.bit_length() / 8)
         f = open(fname, 'rb')
         packets = []
