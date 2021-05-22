@@ -69,6 +69,7 @@ class Receiver:
             logging.info("The server is ready to receive")
             # self.UDP_reciever_socket.settimeout(self.socket_timeout)
             message, clientAddress = self.UDP_reciever_socket.recvfrom(1024)
+            print(clientAddress)
             print(message)
             _, self.packets_number = self.parsePacket(message.decode())
             self.packets_number = int(self.packets_number)

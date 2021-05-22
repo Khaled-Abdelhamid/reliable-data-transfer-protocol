@@ -59,7 +59,7 @@ class Sender:
         self.UDP_sender_socket = socket.socket(
             family=socket.AF_INET, type=socket.SOCK_DGRAM
         )
-        self.UDP_sender_socket.bind(sender_address)
+        # self.UDP_sender_socket.bind(sender_address)
         # Send to server using created UDP socket
         len_packets = len(self.packets)
         file_info = "0\r" + str(len_packets)
@@ -149,7 +149,7 @@ class Sender:
 
 if __name__ == "__main__":
 
-    sender_address = ("192.168.1.10", 1234)
+    sender_address = ("192.168.1.11", 1234)
     receiver_ip = "192.168.1.10"
     receiver_port = 4321
     socket_timeout = 10
