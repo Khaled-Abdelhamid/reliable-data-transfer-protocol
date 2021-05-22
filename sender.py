@@ -148,7 +148,7 @@ class Sender:
 
 if __name__ == "__main__":
 
-    sender_address = ("192.168.1.11", 1234)
+    # sender_address = ("192.168.1.11", 1234)
     receiver_ip = "192.168.1.10"
     receiver_port = 4321
     socket_timeout = 10
@@ -159,7 +159,7 @@ if __name__ == "__main__":
     data_size = 50
 
     sender = Sender(
-        sender_address=sender_address,
+        # sender_address=sender_address,
         receiver_ip=receiver_ip,
         receiver_port=receiver_port,
         filename=filename,
