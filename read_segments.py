@@ -1,10 +1,4 @@
-def read_segments(
-    fname,
-    MTU=1526,
-    Ethernet_header_size=14,
-    IP_protocol_header_size=20,
-    UDP_protocol_header_size=8,
-):
+def read_segments(fname,):
     """ This function is used to read a data file and divides it into segments of packets depending on MSS
         
         input: 
@@ -19,14 +13,11 @@ def read_segments(
         
     """
 
-    with open(fname, mode="r") as f:
+    with open(fname, mode="r", encoding="utf-8") as f:
 
         all_of_it = f.read()  # all data content in a string format
 
-    # This MSS calculation is what actually happens
-    MSS = Ethernet_header_size - IP_protocol_header_size - UDP_protocol_header_size
-    # but here I am just assuming a value for MSS to test easily
-    MSS = 5  # remove this line to use a calculated MSS
+    MSS = 28 * 16  # remove this line to use a calculated MSS
 
     fsize = len(all_of_it)
 
@@ -51,4 +42,6 @@ def read_segments(
     return packets_list
 
 
-print(read_segments("dummy_send.txt")[2])
+packetlist = read_segments("dummy_send.txt")
+print(packetlist[0])
+
