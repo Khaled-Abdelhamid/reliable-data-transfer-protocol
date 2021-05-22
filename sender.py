@@ -65,9 +65,8 @@ class Sender:
         file_info = "0\r" + str(len_packets)
         try:
 
-            self.UDP_sender_socket.sendto(
-                file_info.encode(), self.receiver_address)
-            self.UDP_sender_socket.settimeout(self.socket_timeout)
+            self.UDP_sender_socket.sendto(file_info.encode(), self.receiver_address)
+            # self.UDP_sender_socket.settimeout(self.socket_timeout)
             _, addr = self.UDP_sender_socket.recvfrom(1024)
             logging.info(f"established connection with: {addr}")
             # self.UDP_sender_socket.settimeout(self.socket_timeout)
@@ -149,7 +148,7 @@ class Sender:
 
 if __name__ == "__main__":
 
-    # sender_address = ("192.168.1.11", 1234)
+    sender_address = ("192.168.1.11", 1234)
     receiver_ip = "192.168.1.10"
     receiver_port = 4321
     socket_timeout = 10
@@ -160,7 +159,7 @@ if __name__ == "__main__":
     data_size = 50
 
     sender = Sender(
-        # sender_address=sender_address,
+        sender_address=sender_address,
         receiver_ip=receiver_ip,
         receiver_port=receiver_port,
         filename=filename,
