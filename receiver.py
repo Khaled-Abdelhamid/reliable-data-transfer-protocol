@@ -51,6 +51,7 @@ class Receiver:
         self.packets = []
 
         self.UDPConnect()
+        self.sendAck(50)        
 
     def UDPConnect(self):
         # Create a datagram socket
@@ -59,7 +60,7 @@ class Receiver:
         )
         # Send to server using created UDP socket
         try:
-            # self.UDP_reciever_socket.bind(self.receiver_address)
+            self.UDP_reciever_socket.bind(self.receiver_address)
             logging.info("The server is ready to receive")
             # self.UDP_reciever_socket.settimeout(self.socket_timeout)
             message, clientAddress = self.UDP_reciever_socket.recvfrom(1024)
@@ -75,7 +76,7 @@ class Receiver:
         self.saveFile()
 
     def recievePackets(self):
-        expected_seq_num = 0
+        expected_seq_num = 0    
         while True:
             message, clientAddress = self.UDP_reciever_socket.recvfrom(1024)
             self.seq_num, payload = self.parsePacket(message)
@@ -92,24 +93,23 @@ class Receiver:
 
     def parsePacket(self, pkt):
         # TODO split the recieved message into data and sequence number and put each one in the appropriate class value
-        print("INnnnnnnnnnnnnnnnnn")
         meta_data = pkt  # .decode('utf-8')
-        print(meta_data)
-        print("here")
         meta_data.split('\r\n')
-        print(meta_data)
         if(self.seq_num == 0):
             self.seq_num_bytes = len(meta_data[0])
+            print(self.seq_num_bytes)
             self.packets_number = int(meta_data[1])
-        return int.from_bytes(meta_data[0], byteorder='little', signed=False), meta_data[1]
+        # return int.from_bytes(meta_data[0], byteorder='little', signed=False), meta_data[1]
+        return 50, meta_data[1]
 
     def savePayload(self, payload):
         self.packets.append(payload)
 
     def sendAck(self, seq_num):
         self.UDP_reciever_socket.sendto(
-            seq_num.to_bytes(self.seq_num_bytes, byteorder='little', signed=False), self.sender_address)
+            '50'.encode(), self.sender_address)
 
+        # pseq_num.to_bytes(self.seq_num_bytes, byteorder='little', signed=False)
     def saveFile(self):
         all_data = "".join(self.packets)
         out_file = open('received_data.txt', 'w')
@@ -128,7 +128,7 @@ class Receiver:
 if __name__ == "__main__":
 
     packet_size = 512
-    receiver_ip = "192.168.1.11"
+    receiver_ip = "192.168.1.10"
     receiver_port = 4321
     sender_ip = "192.168.1.10"
     sender_port = 1234

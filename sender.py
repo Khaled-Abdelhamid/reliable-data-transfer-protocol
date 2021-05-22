@@ -57,17 +57,17 @@ class Sender:
         self.UDP_sender_socket = socket.socket(
             family=socket.AF_INET, type=socket.SOCK_DGRAM
         )
-        # self.UDP_sender_socket.bind(sender_address)
+        self.UDP_sender_socket.bind(sender_address)
         # Send to server using created UDP socket
         file_info = "50\r\n50"
         try:
             self.UDP_sender_socket.sendto(
                 file_info.encode(), self.receiver_address
             )
-            self.UDP_sender_socket.settimeout(2)
-            _, addr = self.UDP_sender_socket.recvfrom(1)
+            # self.UDP_sender_socket.settimeout(2)
+            _, addr = self.UDP_sender_socket.recvfrom(1024)
             logging.info("established connection with: ", addr)
-            self.UDP_sender_socket.settimeout(self.socket_timeout)
+            # self.UDP_sender_socket.settimeout(self.socket_timeout)
             # self.UDP_sender_socket.bind(self.receiver_address)
 
         except socket.timeout:
@@ -109,18 +109,21 @@ class Sender:
 
     def sendPacket(self, pkt):
         self.UDP_sender_socket.sendto(
-            b'50\n50', self.receiver_address)  # .encode("utf_8")
+            '50\r\n50'.encode(), self.receiver_address)  # .encode("utf_8")
 
     def receiveAck(self):
         # Accept data
         while True:
-            message, clientAddress = self.UDP_sender_sockets.recvfrom(1024)
+            print("HHHHHHHHHHHHHHHHHHHHHHHHH")
+            message, clientAddress = self.UDP_sender_socket.recvfrom(1024)
+            print(message)
             self.lastACK = message  # .decode("utf-8")
+            print(message.decode())
             return message  # .decode("utf-8")
 
     def checkTimeout(self) -> bool:
         now = datetime.datetime.utcnow()
-        if int((now.Subtract(self.timer)).total_seconds()) > self.timeout_period:
+        if int((now - (self.timer)).total_seconds()) > self.timeout_period:
             return True
         else:
             return False
