@@ -59,14 +59,14 @@ class Sender:
         self.UDP_sender_socket = socket.socket(
             family=socket.AF_INET, type=socket.SOCK_DGRAM
         )
-        self.UDP_sender_socket.bind(sender_address)
+        # self.UDP_sender_socket.bind(sender_address)
         # Send to server using created UDP socket
         len_packets = len(self.packets)
         file_info = "0\r" + str(len_packets)
         try:
 
             self.UDP_sender_socket.sendto(file_info.encode(), self.receiver_address)
-            self.UDP_sender_socket.settimeout(self.socket_timeout)
+            # self.UDP_sender_socket.settimeout(self.socket_timeout)
             _, addr = self.UDP_sender_socket.recvfrom(1024)
             logging.info(f"established connection with: {addr}")
             # self.UDP_sender_socket.settimeout(self.socket_timeout)
@@ -149,7 +149,7 @@ class Sender:
 if __name__ == "__main__":
 
     sender_address = ("192.168.1.11", 1234)
-    receiver_ip = "192.168.1.11"
+    receiver_ip = "192.168.1.10"
     receiver_port = 4321
     socket_timeout = 10
     timer = 1
