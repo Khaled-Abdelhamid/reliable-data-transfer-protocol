@@ -129,7 +129,7 @@ if __name__ == "__main__":
     packet_size = 512
     receiver_ip = "192.168.1.10"
     receiver_port = 4321
-    sender_ip = "192.168.1.10"
+    sender_ip = "192.168.1.11"
     sender_port = 1234
     socket_timeout = 10
     timer = 1
