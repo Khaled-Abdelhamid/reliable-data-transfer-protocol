@@ -65,7 +65,8 @@ class Sender:
         file_info = "0\r" + str(len_packets)
         try:
 
-            self.UDP_sender_socket.sendto(file_info.encode(), ("192.168.1.11gc", 4321))
+            self.UDP_sender_socket.sendto(
+                file_info.encode(), ("192.168.1.11", 4321))
             # self.UDP_sender_socket.settimeout(self.socket_timeout)
             _, addr = self.UDP_sender_socket.recvfrom(1024)
             logging.info(f"established connection with: {addr}")
@@ -81,7 +82,6 @@ class Sender:
         expected_seq_num = 0
         self.resetTimer()
         while True:
-
             if expected_seq_num == self.packets_number:
                 print("done :)")
                 break
@@ -148,8 +148,8 @@ class Sender:
 
 if __name__ == "__main__":
 
-    sender_address = ("192.168.1.11", 1234)
-    receiver_ip = "192.168.1.10"
+    sender_address = ("192.168.1.10", 1234)  # TODO clean
+    receiver_ip = "192.168.1.11"
     receiver_port = 4321
     socket_timeout = 10
     timer = 1
