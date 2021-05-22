@@ -51,7 +51,7 @@ class Receiver:
         self.packets = []
 
         self.UDPConnect()
-        self.sendAck(0)
+        # self.sendAck(0)
         self.recievePackets()
         # print("".join(self.packets))
         with open("received.txt", "w") as f:
@@ -69,7 +69,8 @@ class Receiver:
             logging.info("The server is ready to receive")
             # self.UDP_reciever_socket.settimeout(self.socket_timeout)
             message, clientAddress = self.UDP_reciever_socket.recvfrom(1024)
-            print(clientAddress)
+            self.sender_address = clientAddress
+            self.UDP_reciever_socket.sendto("yaaay".encode(), self.sender_address)
             print(message)
             _, self.packets_number = self.parsePacket(message.decode())
             self.packets_number = int(self.packets_number)
