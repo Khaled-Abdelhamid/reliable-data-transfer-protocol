@@ -12,6 +12,7 @@ logging.getLogger().setLevel(logging.INFO)
 class Sender:
     def __init__(
         self,
+        sender_address,
         receiver_ip,
         receiver_port,
         filename="",
@@ -36,6 +37,7 @@ class Sender:
         self.receiver_port = receiver_port
         self.filename = filename
         self.receiver_address = (receiver_ip, receiver_port)
+        self.sender_address = sender_address
         self.socket_timeout = socket_timeout
         self.timeout_period = timeout_period
         self.timer = timer
@@ -57,18 +59,15 @@ class Sender:
         self.UDP_sender_socket = socket.socket(
             family=socket.AF_INET, type=socket.SOCK_DGRAM
         )
-        self.UDP_sender_socket.bind(sender_address)
         # Send to server using created UDP socket
-        file_info = f"0\r\n{self.packets_number}"
+        file_info = "5555555555555555"  # TODO get it back to be variable
         try:
-            self.UDP_sender_socket.sendto(
-                file_info.encode("utf_8"), self.receiver_address
-            )
-            self.UDP_sender_socket.settimeout(2)
-            _, addr = self.UDP_sender_socket.recvfrom(1)
-            logging.info("established connection with: ", addr)
+            self.UDP_sender_socket.sendto(file_info.encode(), self.receiver_address)
             self.UDP_sender_socket.settimeout(self.socket_timeout)
-            self.UDP_sender_socket.bind(self.receiver_address)
+            self.UDP_sender_socket.bind(self.sender_address)
+            _, addr = self.UDP_sender_socket.recvfrom(200)
+
+            logging.info("established connection with: ", addr)
 
         except socket.timeout:
             logging.info("reciever didnt respond, connection failed")
@@ -100,7 +99,7 @@ class Sender:
         packets = []
         for i in range(num_packets):
             packets.append(
-                (i+1).to_bytes(seq_num_bytes, byteorder="little", signed=False)
+                (i + 1).to_bytes(seq_num_bytes, byteorder="little", signed=False)
                 + b"\r\n"
                 + f.read(self.data_size)
             )
@@ -109,12 +108,13 @@ class Sender:
 
     def sendPacket(self, pkt):
         self.UDP_sender_socket.sendto(
-            b'50\n50', self.receiver_address)  # .encode("utf_8")
+            "50\n50".encode(), self.receiver_address
+        )  # .encode("utf_8")
 
     def receiveAck(self):
         # Accept data
         while True:
-            message, clientAddress = self.UDP_sender_sockets.recvfrom(1024)
+            message, clientAddress = self.UDP_sender_socket.recvfrom(1024)
             self.lastACK = message  # .decode("utf-8")
             return message  # .decode("utf-8")
 
@@ -131,10 +131,10 @@ class Sender:
 
 if __name__ == "__main__":
 
-    sender_address = ("192.168.43.127", 1234)
+    sender_address = ("192.168.1.11", 15000)
     packet_size = 512
-    receiver_ip = "192.168.43.127"
-    receiver_port = 4321
+    receiver_ip = "192.168.1.10"
+    receiver_port = 12000
     socket_timeout = 10
     timer = 1
     window_size = 10
@@ -143,6 +143,7 @@ if __name__ == "__main__":
     data_size = 100
 
     sender = Sender(
+        sender_address=sender_address,
         receiver_ip=receiver_ip,
         receiver_port=receiver_port,
         filename=filename,
