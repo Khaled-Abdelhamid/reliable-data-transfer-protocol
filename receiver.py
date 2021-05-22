@@ -65,7 +65,7 @@ class Receiver:
         )
         # Send to server using created UDP socket
         try:
-            self.UDP_reciever_socket.bind(("", 4321))
+            self.UDP_reciever_socket.bind(('', 4321))
             logging.info("The server is ready to receive")
             # self.UDP_reciever_socket.settimeout(self.socket_timeout)
             message, clientAddress = self.UDP_reciever_socket.recvfrom(1024)
@@ -113,7 +113,8 @@ class Receiver:
         self.packets.append(payload)
 
     def sendAck(self, seq_num):
-        self.UDP_reciever_socket.sendto(str(seq_num).encode(), self.sender_address)
+        self.UDP_reciever_socket.sendto(
+            str(seq_num).encode(), self.sender_address)
 
         # pseq_num.to_bytes(self.seq_num_bytes, byteorder='little', signed=False)
 
@@ -129,7 +130,7 @@ if __name__ == "__main__":
     packet_size = 512
     receiver_ip = "192.168.1.10"
     receiver_port = 4321
-    sender_ip = "192.168.1.10"
+    sender_ip = "192.168.1.11"
     sender_port = 1234
     socket_timeout = 10
     timer = 1
