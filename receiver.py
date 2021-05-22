@@ -67,7 +67,7 @@ class Receiver:
         try:
             self.UDP_reciever_socket.bind(self.receiver_address)
             logging.info("The server is ready to receive")
-            self.UDP_reciever_socket.settimeout(self.socket_timeout)
+            # self.UDP_reciever_socket.settimeout(self.socket_timeout)
             message, clientAddress = self.UDP_reciever_socket.recvfrom(1024)
             print(clientAddress)
             print(message)
@@ -112,7 +112,8 @@ class Receiver:
         self.packets.append(payload)
 
     def sendAck(self, seq_num):
-        self.UDP_reciever_socket.sendto(str(seq_num).encode(), self.sender_address)
+        self.UDP_reciever_socket.sendto(
+            str(seq_num).encode(), self.sender_address)
 
         # pseq_num.to_bytes(self.seq_num_bytes, byteorder='little', signed=False)
 
@@ -122,21 +123,13 @@ class Receiver:
         out_file.write(all_data)
         out_file.close()
 
-    # def printprogressBar(self):
-    # progress = self.seq_num / self.packets_number
-    # print(
-    #     f"({progress*100}) "
-    #     + int(progress * 40) * "="
-    #     # + int((1 - progress) * 40 * " ")
-    # )
-
 
 if __name__ == "__main__":
 
     packet_size = 512
-    receiver_ip = "192.168.1.11"
+    receiver_ip = "192.168.1.10"
     receiver_port = 4321
-    sender_ip = "192.168.1.11"
+    sender_ip = "192.168.1.10"
     sender_port = 1234
     socket_timeout = 10
     timer = 1
