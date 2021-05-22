@@ -59,15 +59,16 @@ class Sender:
         self.UDP_sender_socket = socket.socket(
             family=socket.AF_INET, type=socket.SOCK_DGRAM
         )
+        # self.UDP_sender_socket.bind(sender_address)
         # Send to server using created UDP socket
-        file_info = "5555555555555555"  # TODO get it back to be variable
+        file_info = "50\r\n50"
         try:
             self.UDP_sender_socket.sendto(file_info.encode(), self.receiver_address)
-            self.UDP_sender_socket.settimeout(self.socket_timeout)
-            self.UDP_sender_socket.bind(self.sender_address)
-            _, addr = self.UDP_sender_socket.recvfrom(200)
-
+            self.UDP_sender_socket.settimeout(2)
+            _, addr = self.UDP_sender_socket.recvfrom(1)
             logging.info("established connection with: ", addr)
+            self.UDP_sender_socket.settimeout(self.socket_timeout)
+            # self.UDP_sender_socket.bind(self.receiver_address)
 
         except socket.timeout:
             logging.info("reciever didnt respond, connection failed")
@@ -131,10 +132,10 @@ class Sender:
 
 if __name__ == "__main__":
 
-    sender_address = ("192.168.1.11", 15000)
+    sender_address = ("192.168.1.10", 1234)
     packet_size = 512
     receiver_ip = "192.168.1.10"
-    receiver_port = 12000
+    receiver_port = 4321
     socket_timeout = 10
     timer = 1
     window_size = 10
