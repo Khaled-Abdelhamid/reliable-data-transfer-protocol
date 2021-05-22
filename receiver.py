@@ -59,11 +59,12 @@ class Receiver:
         )
         # Send to server using created UDP socket
         try:
-            self.UDP_reciever_socket.bind(self.receiver_address)
+            # self.UDP_reciever_socket.bind(self.receiver_address)
             logging.info("The server is ready to receive")
-            self.UDP_reciever_socket.settimeout(self.socket_timeout)
+            # self.UDP_reciever_socket.settimeout(self.socket_timeout)
             message, clientAddress = self.UDP_reciever_socket.recvfrom(1024)
-            _, self.packets_number = self.parsePacket(message.decode("utf-8"))
+            print(message)
+            _, self.packets_number = self.parsePacket(message.decode())
             # ? should there be 4 ports ? two for sender and two for reciever ?
         except socket.timeout:
             logging.info("reciever didnt respond, connection failed")
@@ -127,9 +128,9 @@ class Receiver:
 if __name__ == "__main__":
 
     packet_size = 512
-    receiver_ip = "192.168.43.127"
+    receiver_ip = "192.168.1.11"
     receiver_port = 4321
-    sender_ip = "192.168.43.127"
+    sender_ip = "192.168.1.10"
     sender_port = 1234
     socket_timeout = 10
     timer = 1
