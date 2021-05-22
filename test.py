@@ -1,15 +1,13 @@
-import math
-import os
+import datetime
+import time
 
-fname = "dummy_send.txt"
-data_size = 50  # in characters
-file_size = os.path.getsize(fname)
-num_packets = math.ceil(file_size / (data_size * 4))
-seq_num_bytes = math.ceil(num_packets.bit_length() / 8)
+now = datetime.datetime.utcnow()
+time.sleep(2)
+b = datetime.datetime.utcnow()
 
-with open(fname, mode="r", encoding="utf8") as f:
-    all_of_it = f.read()  # all data content in a string format
-print(all_of_it)
-packets = []
-for i in range(num_packets):
-    packets.append(i + "\r\n" + )
+print(int((b - now).total_seconds()) > 1)
+
+# if int((now.Subtract(self.timer)).total_seconds()) > self.timeout_period:
+# return True
+# else:
+# return False

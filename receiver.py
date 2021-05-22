@@ -51,7 +51,12 @@ class Receiver:
         self.packets = []
 
         self.UDPConnect()
-        self.sendAck(50)
+        self.sendAck(0)
+        self.recievePackets()
+        # print("".join(self.packets))
+        with open("received.txt", "w") as f:
+            f.write("".join(self.packets))
+            print("received text saved in received.txt")
 
     def UDPConnect(self):
         # Create a datagram socket
@@ -62,11 +67,14 @@ class Receiver:
         try:
             self.UDP_reciever_socket.bind(self.receiver_address)
             logging.info("The server is ready to receive")
-            # self.UDP_reciever_socket.settimeout(self.socket_timeout)
+            self.UDP_reciever_socket.settimeout(self.socket_timeout)
             message, clientAddress = self.UDP_reciever_socket.recvfrom(1024)
             print(message)
             _, self.packets_number = self.parsePacket(message.decode())
-            # ? should there be 4 ports ? two for sender and two for reciever ?
+            self.packets_number = int(self.packets_number)
+            print(self.packets_number)
+            # self.packets_number = int(self.packets_number)
+            # ? should ther0e be 4 ports ? two for sender and two for reciever ?
         except socket.timeout:
             logging.info("reciever didnt respond, connection failed")
             self.UDP_reciever_socket.close()
@@ -79,58 +87,55 @@ class Receiver:
         expected_seq_num = 0
         while True:
             message, clientAddress = self.UDP_reciever_socket.recvfrom(1024)
-            self.seq_num, payload = self.parsePacket(message)
+            self.seq_num, payload = self.parsePacket(message.decode())
             if self.seq_num == expected_seq_num:
                 self.savePayload(payload)
                 self.sendAck(expected_seq_num)
+                print(f"Ack sent for {self.seq_num}")
                 expected_seq_num += 1
                 if self.seq_num == self.packets_number - 1:
                     break
             else:
+                print(f"Ack Error sending {expected_seq_num - 1}")
                 self.sendAck(expected_seq_num - 1)
-
-            self.printprogressBar()
+            # self.printprogressBar()
 
     def parsePacket(self, pkt):
         # TODO split the recieved message into data and sequence number and put each one in the appropriate class value
-        meta_data = pkt  # .decode('utf-8')
-        meta_data.split('\r\n')
-        if(self.seq_num == 0):
-            self.seq_num_bytes = len(meta_data[0])
-            print(self.seq_num_bytes)
-            self.packets_number = int(meta_data[1])
-        # return int.from_bytes(meta_data[0], byteorder='little', signed=False), meta_data[1]
-        return 50, meta_data[1]
+        meta_data = pkt
+        meta_data = meta_data.split("\r")
+        received_seq = meta_data[0]
+        return int(meta_data[0]), meta_data[1]
 
     def savePayload(self, payload):
         self.packets.append(payload)
 
     def sendAck(self, seq_num):
-        self.UDP_reciever_socket.sendto(
-            '50'.encode(), self.sender_address)
+        self.UDP_reciever_socket.sendto(str(seq_num).encode(), self.sender_address)
 
         # pseq_num.to_bytes(self.seq_num_bytes, byteorder='little', signed=False)
+
     def saveFile(self):
         all_data = "".join(self.packets)
-        out_file = open('received_data.txt', 'w')
+        out_file = open("received_data.txt", "w")
         out_file.write(all_data)
         out_file.close()
 
     # def printprogressBar(self):
-        # progress = self.seq_num / self.packets_number
-        # print(
-        #     f"({progress*100}) "
-        #     + int(progress * 40) * "="
-        #     # + int((1 - progress) * 40 * " ")
-        # )
+    # progress = self.seq_num / self.packets_number
+    # print(
+    #     f"({progress*100}) "
+    #     + int(progress * 40) * "="
+    #     # + int((1 - progress) * 40 * " ")
+    # )
 
 
 if __name__ == "__main__":
 
     packet_size = 512
-    receiver_ip = "192.168.1.10"
+    receiver_ip = "192.168.1.11"
     receiver_port = 4321
-    sender_ip = "192.168.1.10"
+    sender_ip = "192.168.1.11"
     sender_port = 1234
     socket_timeout = 10
     timer = 1

@@ -44,11 +44,11 @@ class Sender:
         self.window_size = window_size
         self.data_size = data_size
         self.packets_number = 0
-        self.lastACK = 30
+        self.lastACK = -1
         self.packets = []
 
-        self.UDPConnect()
         self.makePackets(self.filename)
+        self.UDPConnect()
         t1 = threading.Thread(target=self.receiveAck)
         t2 = threading.Thread(target=self.sendFile)
         t1.start()
@@ -61,15 +61,14 @@ class Sender:
         )
         self.UDP_sender_socket.bind(sender_address)
         # Send to server using created UDP socket
-        file_info = "50\r\n50"
+        len_packets = len(self.packets)
+        file_info = "0\r" + str(len_packets)
         try:
 
-            self.UDP_sender_socket.sendto(
-                file_info.encode(), self.receiver_address
-            )
-            # self.UDP_sender_socket.settimeout(2)
+            self.UDP_sender_socket.sendto(file_info.encode(), self.receiver_address)
+            self.UDP_sender_socket.settimeout(self.socket_timeout)
             _, addr = self.UDP_sender_socket.recvfrom(1024)
-            logging.info("established connection with: ", addr)
+            logging.info(f"established connection with: {addr}")
             # self.UDP_sender_socket.settimeout(self.socket_timeout)
             # self.UDP_sender_socket.bind(self.receiver_address)
 
@@ -78,51 +77,63 @@ class Sender:
             self.UDP_sender_socket.close()
 
     def sendFile(self):
-        send_base = 1
-        next_seq_num = 1
+        send_base = 0
+        expected_seq_num = 0
         self.resetTimer()
         while True:
-            if next_seq_num < send_base + self.window_size:
-                self.sendPacket(self.packets[next_seq_num])
-                next_seq_num += 1
+
+            if expected_seq_num == self.packets_number:
+                print("done :)")
+                break
+            if expected_seq_num < send_base + self.window_size:
+                self.sendPacket(self.packets[expected_seq_num])
+                print(f"sending.... {expected_seq_num}")
+                if expected_seq_num == 9:
+                    print(9)
+
+                expected_seq_num += 1
 
             if self.lastACK > send_base:
+                print(f"Acknowledged.... {self.lastACK-1}")
                 send_base = self.lastACK + 1
                 self.resetTimer()
 
             if self.checkTimeout():
+                print(f"Timedout -> Resending....")
+
                 self.resetTimer()
-                for pckt in range(send_base, next_seq_num):
+                for pckt in range(send_base, expected_seq_num):
                     self.sendPacket(self.packets[pckt])
 
     def makePackets(self, fname):
         file_size = os.path.getsize(fname)
         num_packets = math.ceil(file_size / self.data_size)
-        seq_num_bytes = math.ceil(num_packets.bit_length() / 8)
-        f = open(fname, "rb")
+        # seq_num_bytes = math.ceil(num_packets.bit_length() / 8)
+        f = open(fname, "r")
+        # palen_packetsckets =packets []
         packets = []
         for i in range(num_packets):
-            packets.append(
-                (i + 1).to_bytes(seq_num_bytes, byteorder="little", signed=False)
-                + b"\r\n"
-                + f.read(self.data_size)
-            )
+            packets.append(str(i) + "\r" + f.read(self.data_size))
         self.packets = packets
         self.packets_number = len(packets)  # .decode('ascii')
 
     def sendPacket(self, pkt):
         self.UDP_sender_socket.sendto(
-            '50\r\n50'.encode(), self.receiver_address)  # .encode("utf_8")
+            pkt.encode(), self.receiver_address
+        )  # .encode("utf_8")
 
     def receiveAck(self):
         # Accept data
         while True:
-            print("HHHHHHHHHHHHHHHHHHHHHHHHH")
+            # print("In receive function")
             message, clientAddress = self.UDP_sender_socket.recvfrom(1024)
-            print(message)
-            self.lastACK = message  # .decode("utf-8")
-            print(message.decode())
-            return message  # .decode("utf-8")
+            self.lastACK = int(message.decode())  # .decode("utf-8")
+            print(f"Expecting {self.lastACK}")
+            if self.lastACK == self.packets_number - 1:
+                print("finished sending :)")
+                break
+            # print(self.lastACK)
+            # return message  # .decode("utf-8")
 
     def checkTimeout(self) -> bool:
         now = datetime.datetime.utcnow()
@@ -137,16 +148,15 @@ class Sender:
 
 if __name__ == "__main__":
 
-    sender_address = ("192.168.1.10", 1234)
-    packet_size = 512
-    receiver_ip = "192.168.1.10"
+    sender_address = ("192.168.1.11", 1234)
+    receiver_ip = "192.168.1.11"
     receiver_port = 4321
     socket_timeout = 10
     timer = 1
-    window_size = 10
+    window_size = 50
     timeout_period = 2
-    filename = "test.txt"
-    data_size = 100
+    filename = "dummy_send.txt"
+    data_size = 50
 
     sender = Sender(
         sender_address=sender_address,
