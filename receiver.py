@@ -51,7 +51,7 @@ class Receiver:
         self.packets = []
 
         self.UDPConnect()
-        self.sendAck(50)        
+        self.sendAck(50)
 
     def UDPConnect(self):
         # Create a datagram socket
@@ -76,7 +76,7 @@ class Receiver:
         self.saveFile()
 
     def recievePackets(self):
-        expected_seq_num = 0    
+        expected_seq_num = 0
         while True:
             message, clientAddress = self.UDP_reciever_socket.recvfrom(1024)
             self.seq_num, payload = self.parsePacket(message)

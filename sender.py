@@ -12,6 +12,7 @@ logging.getLogger().setLevel(logging.INFO)
 class Sender:
     def __init__(
         self,
+        sender_address,
         receiver_ip,
         receiver_port,
         filename="",
@@ -36,13 +37,14 @@ class Sender:
         self.receiver_port = receiver_port
         self.filename = filename
         self.receiver_address = (receiver_ip, receiver_port)
+        self.sender_address = sender_address
         self.socket_timeout = socket_timeout
         self.timeout_period = timeout_period
         self.timer = timer
         self.window_size = window_size
         self.data_size = data_size
         self.packets_number = 0
-        self.lastACK = None
+        self.lastACK = 30
         self.packets = []
 
         self.UDPConnect()
@@ -61,6 +63,7 @@ class Sender:
         # Send to server using created UDP socket
         file_info = "50\r\n50"
         try:
+
             self.UDP_sender_socket.sendto(
                 file_info.encode(), self.receiver_address
             )
@@ -100,7 +103,7 @@ class Sender:
         packets = []
         for i in range(num_packets):
             packets.append(
-                (i+1).to_bytes(seq_num_bytes, byteorder="little", signed=False)
+                (i + 1).to_bytes(seq_num_bytes, byteorder="little", signed=False)
                 + b"\r\n"
                 + f.read(self.data_size)
             )
@@ -146,6 +149,7 @@ if __name__ == "__main__":
     data_size = 100
 
     sender = Sender(
+        sender_address=sender_address,
         receiver_ip=receiver_ip,
         receiver_port=receiver_port,
         filename=filename,
